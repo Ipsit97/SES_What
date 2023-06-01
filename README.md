@@ -6,5 +6,5 @@ Setup for React:
 
 Running the repository:
 1) Clone the repository using the link.
-2) Move to the directory where repository is cloned using cd/<your path>
+2) Move to the directory where repository is cloned using cd/'<your path>'
 3) Run "npm start"
