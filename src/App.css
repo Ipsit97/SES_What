@@ -36,3 +36,24 @@
     transform: rotate(360deg);
   }
 }
+
+.outer-component {
+  width: 1400px;
+  height: 1000px;
+  border-radius: 5%;
+  background-color: #242844;
+  display: flex;
+  margin-top: 30px;
+  margin-left: 20px;
+}
+
+.graphs-component {
+  width: 1400px;
+  height: 1000px;
+  border-radius: 5%;
+  background-color: #242844;
+  display: flex;
+  margin-top: 30px;
+  margin-left: 20px;
+}
+
