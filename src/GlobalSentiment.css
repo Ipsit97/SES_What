@@ -2,9 +2,9 @@
     width: 600px;
     height: 400px;
     border-radius: 5%;
-    background-color: #242844;
+    background-color: rgb(49, 121, 165);
     display: flex;
-    margin-top: 200px;
+    margin-top: 20px;
     margin-left: 20px;
 
   }
@@ -13,6 +13,7 @@
     color: white;
     font-size: 30px;
     margin-left: 30px;
+    margin-top: 25px;
   }
 
   .barChartStyle{

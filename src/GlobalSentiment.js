@@ -63,6 +63,10 @@ const GlobalSentiment = (props) => {
         {
           drawOnChartArea: false, 
         },
+        border:
+        {
+          color:'white',
+        }
       },
       y:{
         ticks:
@@ -73,6 +77,10 @@ const GlobalSentiment = (props) => {
         {
           drawOnChartArea: false,
         },
+        border:
+        {
+          color:'white',
+        }
       },
     }
   };

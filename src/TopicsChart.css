@@ -1,6 +1,6 @@
 .topicsContainer{
-    width: 600px;
-    height: 600px;
+    width: 650px;
+    height: 650px;
     margin-top: 200px;
     margin-left: 40px;
 }
@@ -19,7 +19,7 @@
     font-size: 30px;
     position: absolute;
     margin-left: 760px;
-    margin-top: -900px;  
+    margin-top: -950px;  
 }  
 
 .sentimentStyle
@@ -73,7 +73,7 @@
 .vertDivider {
     margin-left: 730px;
     margin-top: -750px;
-    border-left: 1px solid #808080;
+    border-left: 2px solid #6c6c6c;
     height: 880px;
   }
 
@@ -81,6 +81,6 @@
 {
     margin-left: 770px;
     margin-top: -10px;
-    border-bottom: 1px solid grey;
+    border-bottom: 2px solid rgb(103, 103, 103);
     width: 600px;
 }  

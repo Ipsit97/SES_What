@@ -12,7 +12,7 @@ ChartJS.register(ChartDataLabels);
 
 const gradientColors = [
     "rgba(255, 99, 132, 1)",
-    "rgba(54, 162, 235, 1)",
+    "rgb(138, 135, 135)",
     "rgba(75, 192, 192, 1)",
     "rgba(255, 159, 64, 1)",
   ];
@@ -28,7 +28,7 @@ const gradientColors = [
 const TopicsChart = (props) => {
 
     var data = props.message;
-    var selectedTopicComments = [];;
+    var selectedTopicComments = [];
     var selectedTopicSubs = [];
     var selectedSubTopicComments = [];
     const [chartData, setChartData] = useState({});  
@@ -36,6 +36,7 @@ const TopicsChart = (props) => {
     const [selectedComments, setSelectedComments] = useState([]);
     const [selectedSubTopics, setSelectedSubTopics] = useState([]);
     const [subTopicChartData, setSubTopicChartData] = useState({});
+    const [filteredResultsForTable, setFilteredResultsForTable] = useState([]);
     const [showSubTopicChart, setShowSubTopicChart] = useState(false);
     const [showPositiveChart, setShowPositiveChart] = useState(false);
     const [showNegativeChart, setShowNegativeChart] = useState(false);
@@ -83,6 +84,7 @@ const TopicsChart = (props) => {
           selectedTopicComments = filteredResults.map((item) => item.Comments);
           selectedTopicSubs = filteredResults.map((item) => item.SubTopics);
 
+
           if (selectedTopicComments.join(',') !== storeTableData.join(',')) {
             setstoreTableData(selectedTopicComments);
           }
@@ -91,6 +93,10 @@ const TopicsChart = (props) => {
             setSelectedSubTopics(selectedTopicSubs);
           }
 
+          if (filteredResults.join(',') !== filteredResultsForTable.join(',')) {
+            setFilteredResultsForTable(filteredResults);
+          }
+          
           sethasTableData(true);
           setCurrentPage(1);
           setSelectedTopic(topic);
@@ -491,6 +497,7 @@ const TopicsChart = (props) => {
       const paginatedData = storeTableData.slice(startIndex, endIndex);
 
       setTableData(paginatedData);
+      console.log(tableData);
       setTotalPages(Math.ceil(storeTableData.length / itemsPerPage));
     };
 
@@ -500,6 +507,26 @@ const TopicsChart = (props) => {
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
+
+  const getRowColor = (value) => {
+    if (value === 'positive') {
+      return '#0BDA51';
+    } else if (value === 'negative') {
+      return 'rgb(151, 8, 8)';
+    } else if (value === 'neutral') {
+      return '#F6BE00';
+    } else {
+      return 'white';
+    }
+  };
+
+  const getSentiment = (comment) => {
+
+    var sentiment = ' ';
+    sentiment = filteredResultsForTable.filter((row) => row.Comments === comment).map((row) => row.Sentiment);
+    return sentiment;
+
+  }
 
   
 
@@ -587,7 +614,8 @@ const TopicsChart = (props) => {
         <tbody>
           {tableData.map((comments,i) => (
             <tr key={i}>
-              <td>{comments}</td>
+              <td style={{fontWeight:'bold',
+              color: getRowColor(getSentiment(comments)[0])}}>{comments}</td>
             </tr>
           ))}
         </tbody>

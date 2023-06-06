@@ -41,7 +41,7 @@
   width: 1400px;
   height: 1000px;
   border-radius: 5%;
-  background-color: #242844;
+  background-color: rgb(49, 121, 165);
   display: flex;
   margin-top: 30px;
   margin-left: 20px;
@@ -51,9 +51,59 @@
   width: 1400px;
   height: 1000px;
   border-radius: 5%;
-  background-color: #242844;
+  background-color:rgb(49, 121, 165);
   display: flex;
   margin-top: 30px;
   margin-left: 20px;
 }
 
+
+.topBar{
+  width: 1450px;
+  height: 120px;
+  margin-top: 0px;
+  background-color: rgba(0, 100, 164, 1);
+}
+
+.logo-style{
+  margin-left:-1050px;
+  margin-top: -30px;
+}
+
+.UCI_logo{
+  width:400px;
+  height:120px;
+}
+
+.anteater-logo-style{
+  margin-left:1150px;
+  margin-top: -110px;
+}
+
+.anteater_logo{
+  width:300px;
+  height:110px;
+}
+
+
+.border-style{
+  margin-top: -2px;
+  width: 1450px;
+  border-bottom: 2px solid grey;
+  box-shadow: 2px 2px 4px black;
+  height: 45px;
+  z-index: 10;
+}
+
+.style-text_heading
+{
+  text-shadow:1px 1px 2px black;
+  color: rgb(151, 151, 45); 
+  font-family: 'Raleway',sans-serif; 
+  font-size: 35px; 
+  font-weight: 700;
+  line-height: 72px; 
+  margin-top:-60px;
+  text-align: center; 
+  text-transform: uppercase;
+}

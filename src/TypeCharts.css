@@ -1,8 +1,8 @@
-.topicsByStrengthContainer{
-    width: 300px;
-    height: 400px;
+.topicsByTypeContainer{
+    width: 700px;
+    height: 600px;
     margin-top: 200px;
-    margin-left: 40px;
+    margin-left: 20px;
 }
   
 .text-color-topic {
@@ -10,21 +10,77 @@
     font-size: 30px;
     position: absolute;
     margin-left: 40px;
-    margin-top: -170px;
+    margin-top: -180px;
   }
 
-  .topicsByImprovContainer
-  {
-    width: 300px;
-    height: 400px;
-    margin-top: -400px;
-    margin-left: 500px;
-  }
+.vertDivider {
+    margin-left: 730px;
+    margin-top: -750px;
+    border-left: 1px solid #808080;
+    height: 880px;
+  }  
 
-  .topicsByOCommContainer
-  {
-    width: 300px;
-    height: 400px;
-    margin-top: -400px;
-    margin-left: 960px;
-  }
+.text-color-type
+{
+  color: white;
+  font-size: 30px;
+  position: absolute;
+  margin-left: 760px;
+  margin-top: -910px;
+}
+
+.tableStyle{
+  width: 550px;
+  height: 500px;
+  margin-top: -85px;
+  margin-left: 800px;
+}
+
+.styled-type-table {
+  margin: 25px 0;
+  font-family: sans-serif;
+  width: 600px;
+  height: 600px;
+  margin-left: -30px;
+  margin-top: -800px;
+  border-radius: 20px;
+  border: 2px solid rgb(255, 255, 255);
+}
+
+.styled-type-table th,
+.styled-type-table td {
+    padding: 12px 15px;
+    color: white;
+    font-size: 0.9em;
+    border: 1px solid rgb(255, 255, 255);
+}
+
+.styled-type-table thead tr {
+  background-color: #181a2b;
+  color: #ffffff;
+  text-align: center;
+  font-size: 1.3em;
+  padding: 15px 20px;
+}
+.styled-type-table tbody tr:nth-of-type(even) {
+  background-color: rgb(8, 70, 109);
+}
+
+.paginationStyle
+{
+  display: inline-block;
+}
+
+.paginationStyle button {
+  float: left;
+  padding: 8px 16px;
+  text-decoration: none;
+}
+
+.paginationStyle button.active
+{
+  background-color: #1f1d1d;
+  color: white;
+  border-radius: 8px;
+}
+

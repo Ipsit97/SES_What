@@ -1,13 +1,26 @@
-import { Chart as ChartJS,Tooltip, Legend, BarElement, CategoryScale,LinearScale } from "chart.js";
+import { useEffect, useState } from "react";
+import { Line,PolarArea } from 'react-chartjs-2';
+import {Chart, ChartConfiguration, LineController, LineElement, PointElement, LinearScale, Title,RadialLinearScale,
+  ArcElement,} from 'chart.js';
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import './ComparisonGraphs.css';
-import { useEffect, useState } from "react";
+
+Chart.register(PointElement,LineController, LineElement,LinearScale, Title,RadialLinearScale,ArcElement,);
+Chart.register(ChartDataLabels);
 
 
 const ComparisonGraphs = (props) => {
 
-  const [showMenu,setShowMenu] = useState(false);
-  const [selectedValue,setSelectedValue] = useState(null);
+  var data = props.message;
+  const [showMenu1,setShowMenu1] = useState(false);
+  const [showMenu2,setShowMenu2] = useState(false);
+  const [selectedValue1,setSelectedValue1] = useState(null);
+  const [selectedValue2,setSelectedValue2] = useState(null);
+  const [ChartLabelData,setChartLabelData] = useState(null);
+  const [ChartData,setChartData] = useState(null);
+  const [typeChart,setTypeChart] = useState("");
+  
+
 
     const Icon = () => {
       return (
@@ -18,7 +31,7 @@ const ComparisonGraphs = (props) => {
     };
 
     useEffect(() => {
-      const handler = () => setShowMenu(false);
+      const handler = () => setShowMenu1(false);
 
       window.addEventListener("click", handler);
       return () => {
@@ -26,43 +39,254 @@ const ComparisonGraphs = (props) => {
       }
     });
 
-    const handleInputClick = (e) => {
+    useEffect(() => {
+      const handler = () => setShowMenu2(false);
+
+      window.addEventListener("click", handler);
+      return () => {
+        window.removeEventListener("click",handler);
+      }
+    });
+
+    const handleInputClick1 = (e) => {
       e.stopPropagation();
-      setShowMenu(!showMenu);
+      setShowMenu1(!showMenu1);
+    };
+
+    const handleInputClick2 = (e) => {
+      e.stopPropagation();
+      setShowMenu2(!showMenu2);
     };
 
     
-      const getDisplay = () => {
-        if(selectedValue)
-          return selectedValue.label;
-        return "Sentiments";  
+      const getDisplay_dropdown1 = () => {
+        if(selectedValue1)
+          return selectedValue1.label;
+        return "Select...";  
       };
 
-      const onItemClick = (option) => {
-        setSelectedValue(option);
+      const getDisplay_dropdown2 = () => {
+        if(selectedValue2)
+          return selectedValue2.label;
+        return "Select...";  
+      };
+
+      const onItemClick1 = (option) => {
+        setSelectedValue1(option);
+      }
+      const onItemClick2 = (option) => {
+        setSelectedValue2(option);
       }
 
-      const isSelected = (option) => {
-        if(!selectedValue)
+      const isSelected1 = (option) => {
+        if(!selectedValue1)
           return false;
-        return selectedValue.value === option.value;  
+        return selectedValue1.value === option.value;  
+      }
+
+      const isSelected2 = (option) => {
+        if(!selectedValue2)
+          return false;
+        return selectedValue2.value === option.value;  
       }
 
     
-      const options = [
+      const options_menu1 = [
         {value:"# of Comments", label:"# of Comments"},
         {value:"Sentiments", label:"Sentiments"},
       ];
+
+      const options_menu2 = [
+        {value:"Category", label:"Category of Comments"},
+        {value:"Year", label:"Year"},
+        {value:"Type_Class", label:"Grad vs Under_Grad"},
+        {value:"Course", label:"Course"},
+      ];
+
+      const getDataWithEmptyPoint = (data) => {
+        const modifiedData = [null, ...data];
+        return modifiedData;
+      };
+
+      const handleButtonClick = () => {
+        if (data.length > 0) {
+          var val="";
+
+          if(selectedValue2.value === "Category")
+          {
+            val = "Type";
+            setTypeChart("Polar");
+          }
+          else if(selectedValue2.value === "Year")
+          {
+            val = "Year";
+            setTypeChart("Line");
+          }  
+          else if(selectedValue2.value === "Type_Class")  
+            val = "Grad vs Under_Grad";
+          else
+            val = "Course";   
+
+          const extractedColumnData = data.map((row) => row[val]);
+
+          if (extractedColumnData.length > 0) {
+            const uniqueValues = [...new Set(extractedColumnData)];
+            const counts = uniqueValues.map((value) =>
+            extractedColumnData.filter((v) => v === value).length
+            );
+            
+              setChartLabelData(getDataWithEmptyPoint(uniqueValues));
+              setChartData(getDataWithEmptyPoint(counts));
+          }
+          else
+          {
+
+          }
+
+      }
+    };
   
+      const data_lineChart = {
+        labels: ChartLabelData,
+        datasets: [
+          {
+            data: ChartData,
+            pointBackgroundColor: 'red', // Change data point color
+            borderColor: 'white', // Change line color
+            pointStyle: 'circle',
+            pointRadius: 5,
+            pointHoverRadius: 10,
+            datalabels:
+            {
+              color:'white',
+              anchor:'middle',
+              align:'middle',
+              formatter: function(value){
+                return value;
+            },
+
+          }  
+          },      
+        ],
+      };
+  
+      const options = {
+        responsive: true,
+        plugins: {
+          legend: {
+            display:false,
+          },
+          tooltip: {
+            enabled: true,
+          },
+          datalabels: {
+            display: false,
+          },
+        },
+        scales: {
+          y: {
+            ticks:
+            {
+              color:'white',
+            },
+            grid:
+            {
+              drawOnChartArea: false, 
+              color:'black',
+            },
+            border:
+            {
+              color:'white',
+            }
+          },
+          x: {
+            ticks:
+            {
+              color:'white',
+            },
+            grid:
+            {
+              drawOnChartArea: false, 
+              color:'black',
+            },
+            border:{
+              color:'white',
+            }
+          },
+        },
+
+      };
+
+      const data_polarChart = {
+        labels: ChartLabelData,
+        datasets: [
+          {
+            data: ChartData,
+            backgroundColor: [
+              'rgba(255, 99, 132, 0.5)',
+              'rgba(54, 162, 235, 0.5)',
+              'rgba(255, 206, 86, 0.5)',
+              'rgba(75, 192, 192, 0.5)',
+              'rgba(153, 102, 255, 0.5)',
+              'rgba(255, 159, 64, 0.5)',
+            ],
+            borderColor: [
+            'rgba(255, 99, 132, 1)', 
+            'rgba(54, 162, 235, 1)', 
+            'rgba(255, 206, 86, 1)',
+          ],
+            borderWidth: 1,
+            datalabels:
+            {
+              color:'white',
+              anchor:'middle',
+              align:'middle',
+              formatter: function(value){
+                return value;
+            },
+          }  
+          },      
+        ],
+      };
+
+      const polarOptions = {
+        responsive: true,
+        plugins: {
+          legend: {
+            display:false,
+          },
+          tooltip: {
+            enabled: true,
+          },
+        },
+        scales: {
+          r: {
+            grid: {
+              color: 'black'
+            },
+            ticks: {
+              color: 'white'
+            }
+          }
+        },
+        datalabels: {
+          formatter: function (value, context) {
+            return context.chart.data.labels[context.dataIndex];
+          },
+        },
+      };
+
+     
 
     return (
         <div className='graphs_container'>
 
         <h2 className="text-color-graphs">Evaluate Results By Graph</h2>
 
-          <div className="dropdown-container">
-        <div onClick={handleInputClick} className="dropdown-input">
-          <div className="dropdown-selected-value">{getDisplay()}</div>
+{/* DropDown Menu-1 */}
+          <div className="dropdown1-container">
+        <div onClick={handleInputClick1} className="dropdown-input">
+          <div className="dropdown-selected-value">{getDisplay_dropdown1()}</div>
           <div className="dropdown-tools">
             <div className="dropdown-tool">
               <Icon />
@@ -70,18 +294,53 @@ const ComparisonGraphs = (props) => {
           </div>
           </div>
 
-        {showMenu && (
+        {showMenu1 && (
           <div className="dropdown-menu">
-            {options.map((option) => (
+            {options_menu1.map((option) => (
               <div 
-              onClick={ () => onItemClick(option)}
-              key={option.value} className={`dropdown-item ${isSelected(option) && "selected"}`}>
+              onClick={ () => onItemClick1(option)}
+              key={option.value} className={`dropdown-item ${isSelected1(option) && "selected"}`}>
                 {option.label}
                 </div>
                 
             ))}
 
         </div>)}
+      </div>
+
+
+      {/* DropDown Menu-2 */}
+      <div className="dropdown2-container">
+        <div onClick={handleInputClick2} className="dropdown2-input">
+          <div className="dropdown-selected-value">{getDisplay_dropdown2()}</div>
+          <div className="dropdown-tools">
+            <div className="dropdown-tool">
+              <Icon />
+            </div>
+          </div>
+          </div>
+
+        {showMenu2 && (
+          <div className="dropdown-menu">
+            {options_menu2.map((option) => (
+              <div 
+              onClick={ () => onItemClick2(option)}
+              key={option.value} className={`dropdown-item ${isSelected2(option) && "selected"}`}>
+                {option.label}
+                </div>
+                
+            ))}
+
+        </div>)}
+      </div>
+
+      <button onClick={handleButtonClick} className="styleButton_apply">Apply</button>
+
+      <div className="lineChartStyle">
+        {typeChart === "Line" && <Line data={data_lineChart} options={options} />}
+      </div>
+      <div className="polarChartStyle">  
+        {typeChart === "Polar" && <PolarArea data={data_polarChart}  />}
       </div>
       </div>
       );

@@ -1,11 +1,11 @@
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
+import { Chart as ChartJS,Tooltip, Legend, BarElement, CategoryScale,LinearScale } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
-import { color } from 'chart.js/helpers';
-import { Pie } from "react-chartjs-2";
+import { Bar } from "react-chartjs-2";
 import { useEffect, useState } from "react";
 import './TypeCharts.css';
 
-ChartJS.register(ArcElement, Tooltip, Legend);
+
+ChartJS.register(Tooltip, Legend,BarElement, CategoryScale,LinearScale);
 ChartJS.register(ChartDataLabels);
 
 const gradientColors = [
@@ -23,12 +23,25 @@ const gradientColors = [
     "rgba(233, 117, 11, 0.8)",
   ];
 
-const ComparisonGraphs = (props) => {
+const TypeCharts = (props) => {
 
-    var data = props.message;
-    const [strengthChartData, setStrengthChartData] = useState({});
-    const [improvChartData, setImprovChartData] = useState({});   
-    const [oCommChartData, setOCommChartData] = useState({}); 
+    var data = props.message; 
+    var selectedTypeComments = [];
+    const [labels, setLabels] = useState([]); 
+    const [strengthData, setStrengthData] = useState([]);
+    const [improvementData, setImprovementData] = useState([]);
+    const [commentData, setCommentsData] = useState([]);
+    const [storeTableData, setstoreTableData] = useState([]);
+    const [selectedCommentsByType, setSelectedCommentsByType] = useState([]);
+    const [selectedTopic, setSelectedTopic] = useState("");
+    const type = ['Improvement','Other Comments','Strength'];
+
+    //Table
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(5);
+    const [tableData, setTableData] = useState([]);
+    const [totalPages, setTotalPages] = useState(0);    
+
 
     function getGradient(context, c1, c2, c3)
     {
@@ -49,186 +62,229 @@ const ComparisonGraphs = (props) => {
     useEffect(() => {
 
         if (data.length > 0) {
-            const topics_strengths = data.filter((row) => row['Type'] === 'Strength').map((row) => row['Topics']);
-            // const comments_strengths = data.filter((row) => row['Type'] === 'Strength').map((row) => row['Comments']);
 
-            if (topics_strengths.length > 0) {
-              const uniqueValues = [...new Set(topics_strengths)];
-              const counts = uniqueValues.map((value) =>
-              topics_strengths.filter((v) => v === value).length
-              );
-        
-              setStrengthChartData({
-                labels: uniqueValues,
-                datasets: [
-                  {
-                    data: counts,
-                    backgroundColor: function(context) {
-                      
-                      const colorIndex = context.dataIndex % gradientColors.length;
-                      let c = gradientColors[colorIndex];
-                  
-                        const mid = color(c).desaturate(0.4).darken(0.3).rgbString();
-                        const start = color(c).lighten(0.5).rotate(270).rgbString();
-                        const end = color(c).lighten(0.1).rgbString();
-                        return getGradient(context, start, mid, end);
-                    },
-                    datalabels:
-                    {
-                      rotation: function(ctx) {
-                        const valuesBefore = ctx.dataset.data.slice(0, ctx.dataIndex).reduce((a, b) => a + b, 0);
-                        const sum = ctx.dataset.data.reduce((a, b) => a + b, 0);
-                        const rotation = ((valuesBefore + ctx.dataset.data[ctx.dataIndex] /2) /sum *360);
-                        return rotation < 180 ? rotation-90 : rotation+90;
-                      },
-                      
-                    }    
-                  }
-        ]
-              });
+            const extractedTopicData = data.map((row) => row['Topics']);
+            if (extractedTopicData.length > 0) {
+              var counts_strength=[]
+              var counts_improvement=[]
+              var counts_oComments=[]
+
+              const uniqueValues = [...new Set(extractedTopicData)];
+
+              for(var i=0;i<uniqueValues.length;i++)
+              {
+                counts_strength.push(data.filter((row) => row['Topics'] === uniqueValues[i]).filter((row) => row['Type'] === 'Strength').length);
+                counts_improvement.push(data.filter((row) => row['Topics'] === uniqueValues[i]).filter((row) => row['Type'] === 'Improvement').length);
+                counts_oComments.push(data.filter((row) => row['Topics'] === uniqueValues[i]).filter((row) => row['Type'] === 'Other Comments').length);
+              }
+              
+              console.log(counts_strength);
+              console.log(counts_improvement);
+              console.log(counts_oComments);
+
+              setStrengthData(counts_strength);
+              setImprovementData(counts_improvement);
+              setCommentsData(counts_oComments);
+              setLabels(uniqueValues);
+
             }
-
-            const topics_improv = data.filter((row) => row['Type'] === 'Improvement').map((row) => row['Topics']);
-      
-            if (topics_improv.length > 0) {
-                const uniqueValues_1 = [...new Set(topics_improv)];
-                const counts_1 = uniqueValues_1.map((value) =>
-                topics_improv.filter((v) => v === value).length
-                );
-          
-                setImprovChartData({
-                  labels: uniqueValues_1,
-                  datasets: [
-                    {
-                      data: counts_1,
-                      backgroundColor: function(context) {
-                        
-                        const colorIndex = context.dataIndex % gradientColors.length;
-                        let c = gradientColors[colorIndex];
-                    
-                          const mid = color(c).desaturate(0.4).darken(0.3).rgbString();
-                          const start = color(c).lighten(0.5).rotate(270).rgbString();
-                          const end = color(c).lighten(0.1).rgbString();
-                          return getGradient(context, start, mid, end);
-                      },
-                      datalabels:
-                      {
-                        rotation: function(ctx) {
-                          const valuesBefore = ctx.dataset.data.slice(0, ctx.dataIndex).reduce((a, b) => a + b, 0);
-                          const sum = ctx.dataset.data.reduce((a, b) => a + b, 0);
-                          const rotation = ((valuesBefore + ctx.dataset.data[ctx.dataIndex] /2) /sum *360);
-                          return rotation < 180 ? rotation-90 : rotation+90;
-                        },
-                        
-                      }    
-                    }
-          ]
-                });
-              }
-
-              const topics_OComm = data.filter((row) => row['Type'] === 'Other Comments').map((row) => row['Topics']);
-
-              if (topics_OComm.length > 0) {
-                const uniqueValues_2 = [...new Set(topics_OComm)];
-                const counts_2 = uniqueValues_2.map((value) =>
-                topics_OComm.filter((v) => v === value).length
-                );
-          
-                setOCommChartData({
-                  labels: uniqueValues_2,
-                  datasets: [
-                    {
-                      data: counts_2,
-                      backgroundColor: function(context) {
-                        
-                        const colorIndex = context.dataIndex % gradientColors.length;
-                        let c = gradientColors[colorIndex];
-                    
-                          const mid = color(c).desaturate(0.4).darken(0.3).rgbString();
-                          const start = color(c).lighten(0.5).rotate(270).rgbString();
-                          const end = color(c).lighten(0.1).rgbString();
-                          return getGradient(context, start, mid, end);
-                      },
-                      datalabels:
-                      {
-                        rotation: function(ctx) {
-                          const valuesBefore = ctx.dataset.data.slice(0, ctx.dataIndex).reduce((a, b) => a + b, 0);
-                          const sum = ctx.dataset.data.reduce((a, b) => a + b, 0);
-                          const rotation = ((valuesBefore + ctx.dataset.data[ctx.dataIndex] /2) /sum *360);
-                          return rotation < 180 ? rotation-90 : rotation+90;
-                        },
-                        
-                      }    
-                    }
-          ]
-                });
-              }
           }
 
+
     },[data]);
+
+    const data1 = {
+      labels : labels,
+      datasets: [
+        {
+          label:'Improvements',
+          data: improvementData,
+          backgroundColor:'#fd5e53',
+          borderColor: '#dc143c',
+          borderWidth: 2,
+        },
+        {
+          label:'General',
+          data: commentData,
+          backgroundColor:'#DBA800',
+          borderColor: '#a0522d',
+          borderWidth: 2,
+        },
+        {
+          label:'Strengths',
+          data: strengthData,
+          backgroundColor: '#32CD32',
+          borderColor: '#355E3B',
+          borderWidth: 2,
+        },
+      ],
+    };    
 
     const options = {
         plugins: {
           tooltip: {
-            enabled: false,
+            enabled: true,
           },
           legend: {
-            display: false,
-    
-          },
-          datalabels: {
-            color: '#ffffff',
             display: true,
-            formatter: function (value, context) {
-              return context.chart.data.labels[context.dataIndex];
-            },
-            anchor : 'center',
-            align : 'center',
+            position:'right',
+            align:'top',
+            labels: {
+              // Define text for the legend
+              generateLabels: function (chart) {
+                return chart.data.datasets.map((dataset) => {
+                  return {
+                    text: dataset.label,
+                    fillStyle: dataset.backgroundColor,
+                    hidden: false,
+                    lineCap: 'butt',
+                    fontColor:'white',
+                    boxWidth: 1,
+                  };
+                });
+              },
+          },
+        },
+          datalabels: {
+            display: false,
             font: {
               weight: 'bold',
               size: 7
           }
           },
         },
-      };  
+        scales: {
+          x: {
+            stacked: true,
+            ticks:
+            {
+              color:'white',
+            },
+            grid:
+            {
+              drawOnChartArea: false, 
+            },
+            border:
+            {
+              color:'white',
+            }
+          },
+          y: {
+            stacked: true,
+            ticks:
+            {
+              color:'white',
+            },
+            grid:
+            {
+              drawOnChartArea: false, 
+            },
+            border:
+            {
+              color:'white',
+            }
+          }
+        },
+        maintainAspectRatio: false,
+        indexAxis: 'y',
+        elements: {
+          bar: {
+            borderWidth: 2,
+          }
+        },
+        onHover: (event, elements) => {
+          if (elements.length > 0) {
+            const hoveredElement = elements[0];
+            const datasetIndex = hoveredElement.datasetIndex;
+            const index = hoveredElement.index;
+    
+            // Access x and y axis values
+            const topicVal = data1.labels[index];
+
+            const filteredResults = data.filter((row) => row['Topics'] === topicVal)
+            const filteredResultsbyType = filteredResults.filter((row) => row['Type'] === type[datasetIndex]);
+            selectedTypeComments = filteredResultsbyType.map((item) => item.Comments);
+
+            if (selectedTypeComments.join(',') !== storeTableData.join(',')) {
+              setstoreTableData(selectedTypeComments);
+            }
+
+            setSelectedCommentsByType(storeTableData);
+            setSelectedTopic(topicVal);
+          }
+        },
+      }; 
+      
+    useEffect(() => {
+        // Simulated data fetch
+        const fetchData = () => {
+          // Assuming you have an array of data
+    
+          const startIndex = (currentPage - 1) * itemsPerPage;
+          const endIndex = startIndex + itemsPerPage;
+          const paginatedData = storeTableData.slice(startIndex, endIndex);
+    
+          setTableData(paginatedData);
+          setTotalPages(Math.ceil(storeTableData.length / itemsPerPage));
+        };
+    
+        fetchData();
+      }, [currentPage,storeTableData]);
+    
+      const handlePageChange = (page) => {
+        setCurrentPage(page);
+      };
+
+      
+      
 
     return (
         <div>
 
             <h2 className="text-color-topic">Topic Hierarchy By Type</h2> 
 
-            <div className="topicsByStrengthContainer">    
-            {strengthChartData.labels && strengthChartData.datasets && (
-            <Pie
-                data={strengthChartData}
-                options = {options}
+            <div className="topicsByTypeContainer">    
+            <Bar
+                data={data1}
+                options={options}
             />
-            )}
             </div>
 
-            <div className="topicsByImprovContainer">    
-            {improvChartData.labels && improvChartData.datasets && (
-            <Pie
-                data={improvChartData}
-                options = {options}
-            />
-            )}
+            <div className="vertDivider"></div>
 
-            </div>
+            <h2 className="text-color-type">Comments By Type</h2> 
 
+            <div className='tableStyle'>
+        <table className="styled-type-table">
+        <thead>
+          <tr>
+            <th>Selected Topic : {selectedTopic} </th>
+          </tr>
+        </thead>
+        <tbody>
+          {tableData.map((comments,i) => (
+            <tr key={i}>
+              <td>{comments}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <div className="paginationStyle">
+        {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
+          <button
+            key={page}
+            className = "active" onClick={() => handlePageChange(page)}
+            disabled={page === currentPage}
+          >
+            {page}
+          </button>
+        ))}
+      </div>
+      </div>
+      </div>
 
-            <div className="topicsByOCommContainer">    
-            {oCommChartData.labels && oCommChartData.datasets && (
-            <Pie
-                data={oCommChartData}
-                options = {options}
-            />
-            )}
-
-            </div>
         
-        </div>
       );
 }
 
-export default ComparisonGraphs;
+export default TypeCharts;
