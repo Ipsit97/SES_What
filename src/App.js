@@ -7,6 +7,7 @@ import ChartDataLabels from "chartjs-plugin-datalabels";
 import GlobalSentiment from './GlobalSentiment.js';
 import ComparisonGraphs from './ComparisonGraphs';
 import TypeCharts from './TypeCharts.js';
+import Navbar from './NavBar.js';
 
 import './App.css';
 import TopicsChart from './TopicsChart';
@@ -197,44 +198,7 @@ const handleCheckboxChange = (event, itemId) => {
     </div>
 
     <div className='border-style'>
-
-
-    {/* <div>
-    <Select className='dropDown-style'
-        defaultValue={[]}
-        isMulti
-        closeMenuOnSelect={false}
-        hideSelectedOptions={false}
-        onChange={(options) => {
-          if (Array.isArray(options)) {
-            setSelectedOptions(options.map((opt) => opt.value));
-          }
-        }}
-        options={allOptions}
-        components={{
-          Option: InputOption
-        }}
-      />
-    </div>
-        <div>
-        <button onClick={handleButtonClick} className="styleButton">Apply</button>
-        </div> */}
-
-      
-{/* ADDITION */}
-
-<div style={{position:'absolute'}}>
-            <nav>
-                <div className="burger-menu" onClick={updateMenu}>
-                    <div className={burger_class} ></div>
-                    <div className={burger_class} ></div>
-                    <div className={burger_class} ></div>
-                </div>
-            </nav>
-
-            <div className={menu_class}></div>
-
-    </div>
+    <Navbar />
     </div>
     <p className='style-text_heading'>WELCOME TO SES_WHAT?</p>
 

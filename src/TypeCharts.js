@@ -34,6 +34,7 @@ const TypeCharts = (props) => {
     const [storeTableData, setstoreTableData] = useState([]);
     const [selectedCommentsByType, setSelectedCommentsByType] = useState([]);
     const [selectedTopic, setSelectedTopic] = useState("");
+    const [selectedIndex, setSelectedIndex] = useState("");    
     const type = ['Improvement','Other Comments','Strength'];
 
     //Table
@@ -68,6 +69,7 @@ const TypeCharts = (props) => {
               var counts_strength=[]
               var counts_improvement=[]
               var counts_oComments=[]
+              var total_counts = []
 
               const uniqueValues = [...new Set(extractedTopicData)];
 
@@ -76,16 +78,26 @@ const TypeCharts = (props) => {
                 counts_strength.push(data.filter((row) => row['Topics'] === uniqueValues[i]).filter((row) => row['Type'] === 'Strength').length);
                 counts_improvement.push(data.filter((row) => row['Topics'] === uniqueValues[i]).filter((row) => row['Type'] === 'Improvement').length);
                 counts_oComments.push(data.filter((row) => row['Topics'] === uniqueValues[i]).filter((row) => row['Type'] === 'Other Comments').length);
+                total_counts.push(counts_strength[i]+counts_improvement[i]+counts_oComments[i]);
               }
+
+              const sortedIndices = total_counts.map((value, index) => index)
+              .sort((a, b) => total_counts[a] - total_counts[b]);
+  
+              const sortedArray_strength = sortedIndices.map((index) => counts_strength[index]);
+              const sortedArray_improv = sortedIndices.map((index) => counts_improvement[index]);
+              const sortedArray_oComments = sortedIndices.map((index) => counts_oComments[index]);
+              const sortedArray_labels = sortedIndices.map((index) => uniqueValues[index]);
+
               
               console.log(counts_strength);
               console.log(counts_improvement);
               console.log(counts_oComments);
 
-              setStrengthData(counts_strength);
-              setImprovementData(counts_improvement);
-              setCommentsData(counts_oComments);
-              setLabels(uniqueValues);
+              setStrengthData(sortedArray_strength);
+              setImprovementData(sortedArray_improv);
+              setCommentsData(sortedArray_oComments);
+              setLabels(sortedArray_labels);
 
             }
           }
@@ -192,7 +204,7 @@ const TypeCharts = (props) => {
             borderWidth: 2,
           }
         },
-        onHover: (event, elements) => {
+        onClick: (event, elements) => {
           if (elements.length > 0) {
             const hoveredElement = elements[0];
             const datasetIndex = hoveredElement.datasetIndex;
@@ -211,6 +223,7 @@ const TypeCharts = (props) => {
 
             setSelectedCommentsByType(storeTableData);
             setSelectedTopic(topicVal);
+            setSelectedIndex(datasetIndex);
           }
         },
       }; 
@@ -241,7 +254,7 @@ const TypeCharts = (props) => {
     return (
         <div>
 
-            <h2 className="text-color-topic">Topic Hierarchy By Type</h2> 
+            <h2 className="text-color-topic">Topics</h2> 
 
             <div className="topicsByTypeContainer">    
             <Bar
@@ -252,13 +265,13 @@ const TypeCharts = (props) => {
 
             <div className="vertDivider"></div>
 
-            <h2 className="text-color-type">Comments By Type</h2> 
+            <h2 className="text-color-type">Comments For Type:</h2> <p className='style_topic_type'>{selectedTopic}</p>
 
             <div className='tableStyle'>
         <table className="styled-type-table">
         <thead>
           <tr>
-            <th>Selected Topic : {selectedTopic} </th>
+            <th>{type[selectedIndex]}</th>
           </tr>
         </thead>
         <tbody>

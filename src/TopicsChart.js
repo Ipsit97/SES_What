@@ -31,6 +31,7 @@ const TopicsChart = (props) => {
     var selectedTopicComments = [];
     var selectedTopicSubs = [];
     var selectedSubTopicComments = [];
+    const [totalComments, setTotalComments] = useState(0);
     const [chartData, setChartData] = useState({});  
     const [selectedTopic, setSelectedTopic] = useState("");
     const [selectedComments, setSelectedComments] = useState([]);
@@ -38,18 +39,9 @@ const TopicsChart = (props) => {
     const [subTopicChartData, setSubTopicChartData] = useState({});
     const [filteredResultsForTable, setFilteredResultsForTable] = useState([]);
     const [showSubTopicChart, setShowSubTopicChart] = useState(false);
-    const [showPositiveChart, setShowPositiveChart] = useState(false);
-    const [showNegativeChart, setShowNegativeChart] = useState(false);
-    const [showNeutralChart, setShowNeutralChart] = useState(false);
-    const [SubTopicSelected, setSubTopicSelected] = useState("");
-    const [hasTableData, sethasTableData] = useState(false);
     const [storeTableData, setstoreTableData] = useState([]);
     const [selectedTopicSentiments, setSelectedTopicSentiments] = useState([]);
-    const [selectedCommentsSubTopics, setSelectedCommentsSubTopics] = useState([]);
-    const [showSubTopicColumn, setShowSubTopicColumn] = useState(false);
-    const [positiveVal, setPositiveVal] = useState(0);
-    const [negativeVal, setNegativeVal] = useState(0);
-    const [neutralVal, setNeutralVal] = useState(0);
+    const [sentimentsVal, setSentimentsVal] = useState([0,0,0]);
 
     //Table
     const [currentPage, setCurrentPage] = useState(1);
@@ -75,11 +67,132 @@ const TopicsChart = (props) => {
       return gradient;
     }
 
+    const handleSubTopicSectionClick = (event, elements) => {
+      if (elements && elements.length > 0) {
+         
+        const index = elements[0].index;
+        const subTopic = subTopicChartData.labels[index];
 
-      const handleTopicsOnHoverEvent = (e, activeElements, chart) => {
-        if (activeElements[0]) {
-          let ctx = activeElements[0].element.$context;
-          let topic = chart.data.labels[ctx.dataIndex];
+        if(subTopic == selectedTopic)
+        {
+          setShowSubTopicChart(false);
+          setTotalComments(data.length);
+        }
+        else
+        {
+          var sentiments = [];
+          setSelectedTopic(subTopic);
+
+          console.log(storeTableData);
+
+          selectedComments.map((comments, index) => {
+
+            if(selectedSubTopics[index] === subTopic)
+              selectedSubTopicComments.push(comments);
+        });
+
+          if (selectedSubTopicComments.join(',') !== storeTableData.join(',')) {
+            setstoreTableData(selectedSubTopicComments);
+          }
+          setCurrentPage(1);
+
+          var selectedSubTopicSentiments = [];
+          selectedTopicSentiments.map((sentiment, index) => {
+
+            // selectedSubTopicComments.push(comments)
+            if(selectedSubTopics[index] === subTopic)
+            selectedSubTopicSentiments.push(sentiment);
+        });
+
+
+          var p=0,n=0,neu=0;
+    
+          for(var i =0;i<selectedSubTopicSentiments.length;i++)
+          {
+            if(selectedSubTopicSentiments[i] === 'positive')
+              p++;
+            else if(selectedSubTopicSentiments[i] === 'negative')
+              n++;
+            else
+              neu++;    
+          }
+    
+          var positive = ((p/(p+n+neu))*100).toFixed(0);
+          var neutral = ((neu/(p+n+neu))*100).toFixed(0);
+          var negative = 100-(parseInt(positive)+parseInt(neutral));
+          sentiments.push(positive);
+          sentiments.push(neutral);
+          sentiments.push(negative);
+
+          setSentimentsVal(sentiments);
+        }
+      }
+      };  
+
+    const handleSectionClick = (event, elements) => {
+        if (elements && elements.length > 0) {
+          
+          console.log(elements[0].index);
+          const index = elements[0].index;
+          const topic = chartData.labels[index];
+
+          if(topic === selectedTopic)
+          {
+    
+            const filteredResults = data.filter((row) => row['Topics'] === topic)
+            var comments = filteredResults.map((item) => item.Comments);
+            setSelectedComments(comments);
+                  
+            const subtopics = data.filter((row) => row['Topics'] === topic).map((row) => row['SubTopics']);
+      
+            if (subtopics.length > 0) {
+              const uniqueSubTopicsValues = [...new Set(subtopics)];
+              const countsSubTopics = uniqueSubTopicsValues.map((value) =>
+              subtopics.filter((v) => v === value).length
+              );
+
+            const sortedIndices = countsSubTopics.map((value, index) => index)
+            .sort((a, b) => countsSubTopics[a] - countsSubTopics[b]);
+  
+            const sortedArray_labels = sortedIndices.map((index) => uniqueSubTopicsValues[index]);
+            var sorted_counts = countsSubTopics.sort((a,b) => a-b);  
+      
+      
+            setSubTopicChartData({
+              labels: sortedArray_labels,
+              datasets: [
+                {
+                  data: sorted_counts,
+                  backgroundColor: function(context) {
+                    
+                    const colorIndex = context.dataIndex % subTopicGradientColors.length;
+                    let c = subTopicGradientColors[colorIndex];
+                
+                      const mid = color(c).desaturate(0.4).darken(0.3).rgbString();
+                      const start = color(c).lighten(0.5).rotate(270).rgbString();
+                      const end = color(c).lighten(0.1).rgbString();
+                      return getGradient(context, start, mid, end);
+                  }, 
+                  datalabels:
+                  {
+                    rotation : function(ctx) {
+                      const valuesBefore = ctx.dataset.data.slice(0, ctx.dataIndex).reduce((a, b) => a + b, 0);
+                      const sum = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                      const rotation = ((valuesBefore + ctx.dataset.data[ctx.dataIndex] /2) /sum *360);
+                      return rotation < 180 ? rotation-90 : rotation+90;
+                    },
+                  }    
+                }
+              ]
+            });
+            setShowSubTopicChart(true);
+            setTotalComments(comments.length);
+          }
+          setSelectedTopic("");
+        }
+        else
+        {
+          var sentiments = [];
           const filteredResults = data.filter((row) => row['Topics'] === topic)
           selectedTopicComments = filteredResults.map((item) => item.Comments);
           selectedTopicSubs = filteredResults.map((item) => item.SubTopics);
@@ -96,8 +209,6 @@ const TopicsChart = (props) => {
           if (filteredResults.join(',') !== filteredResultsForTable.join(',')) {
             setFilteredResultsForTable(filteredResults);
           }
-          
-          sethasTableData(true);
           setCurrentPage(1);
           setSelectedTopic(topic);
           setSelectedComments(storeTableData);
@@ -122,134 +233,16 @@ const TopicsChart = (props) => {
               neu++;    
           }
     
-          setPositiveVal(((p/(p+n+neu))*100).toFixed(2));
-          setNegativeVal(((n/(p+n+neu))*100).toFixed(2));
-          setNeutralVal(((neu/(p+n+neu))*100).toFixed(2));
-          setShowPositiveChart(true);
-          setShowNegativeChart(true);
-          setShowNeutralChart(true);
-        }
-      };
+          var positive = ((p/(p+n+neu))*100).toFixed(0);
+          var neutral = ((neu/(p+n+neu))*100).toFixed(0);
+          var negative = 100-(parseInt(positive)+parseInt(neutral));
+          sentiments.push(positive);
+          sentiments.push(neutral);
+          sentiments.push(negative);
 
+          setSentimentsVal(sentiments);
+        }          
 
-    const handleOnHoverEvent = (e, activeElements, chart) => {
-        if (activeElements[0]) {
-          let ctx = activeElements[0].element.$context;
-          let label = chart.data.labels[ctx.dataIndex];
-          setSubTopicSelected(label);
-          setSelectedTopic(label);
-
-          console.log(storeTableData);
-
-          selectedComments.map((comments, index) => {
-
-            // selectedSubTopicComments.push(comments)
-            if(selectedSubTopics[index] === label)
-              selectedSubTopicComments.push(comments);
-        });
-
-          // const subtopics = storeTableData.filter((row) =>  === topic);
-          
-          // if (selectedSubTopicComments.join(',') !== selectedCommentsSubTopics.join(',')) {
-          //   setSelectedCommentsSubTopics(selectedSubTopicComments);
-          // }
-
-          if (selectedSubTopicComments.join(',') !== storeTableData.join(',')) {
-            setstoreTableData(selectedSubTopicComments);
-          }
-          setCurrentPage(1);
-
-          var selectedSubTopicSentiments = [];
-          selectedTopicSentiments.map((sentiment, index) => {
-
-            // selectedSubTopicComments.push(comments)
-            if(selectedSubTopics[index] === label)
-            selectedSubTopicSentiments.push(sentiment);
-        });
-
-
-          var p=0,n=0,neu=0;
-    
-          for(var i =0;i<selectedSubTopicSentiments.length;i++)
-          {
-            if(selectedSubTopicSentiments[i] === 'positive')
-              p++;
-            else if(selectedSubTopicSentiments[i] === 'negative')
-              n++;
-            else
-              neu++;    
-          }
-    
-          setPositiveVal(((p/(p+n+neu))*100).toFixed(2));
-          setNegativeVal(((n/(p+n+neu))*100).toFixed(2));
-          setNeutralVal(((neu/(p+n+neu))*100).toFixed(2));
-          setShowPositiveChart(true);
-          setShowNegativeChart(true);
-          setShowNeutralChart(true);
-        }
-          
-      };
-
-    const handleSubTopicSectionClick = (event, elements) => {
-        sethasTableData(false);
-        setShowSubTopicChart(false);
-        setShowSubTopicColumn(false);
-      };  
-
-    const handleSectionClick = (event, elements) => {
-        if (elements && elements.length > 0) {
-          console.log(elements[0].index);
-          const index = elements[0].index;
-          const topic = chartData.labels[index];
-          // setSelectedTopic(topic)
-    
-          const filteredResults = data.filter((row) => row['Topics'] === topic)
-          setSelectedComments(filteredResults.map((item) => item.Comments));
-          // setSelectedSubTopics(filteredResults.map((item) => item.SubTopics));
-          
-    
-          const subtopics = data.filter((row) => row['Topics'] === topic).map((row) => row['SubTopics']);
-          
-    
-    
-          if (subtopics.length > 0 && subtopics[0] != 'N/A') {
-            const uniqueSubTopicsValues = [...new Set(subtopics)];
-            const countsSubTopics = uniqueSubTopicsValues.map((value) =>
-            subtopics.filter((v) => v === value).length
-            );
-    
-    
-          setSubTopicChartData({
-            labels: uniqueSubTopicsValues,
-            datasets: [
-              {
-                data: countsSubTopics,
-                backgroundColor: function(context) {
-                  
-                  const colorIndex = context.dataIndex % subTopicGradientColors.length;
-                  let c = subTopicGradientColors[colorIndex];
-              
-                    const mid = color(c).desaturate(0.4).darken(0.3).rgbString();
-                    const start = color(c).lighten(0.5).rotate(270).rgbString();
-                    const end = color(c).lighten(0.1).rgbString();
-                    return getGradient(context, start, mid, end);
-                }, 
-                datalabels:
-                {
-                  rotation : function(ctx) {
-                    const valuesBefore = ctx.dataset.data.slice(0, ctx.dataIndex).reduce((a, b) => a + b, 0);
-                    const sum = ctx.dataset.data.reduce((a, b) => a + b, 0);
-                    const rotation = ((valuesBefore + ctx.dataset.data[ctx.dataIndex] /2) /sum *360);
-                    return rotation < 180 ? rotation-90 : rotation+90;
-                  },
-                }    
-              }
-            ]
-          });
-          setShowSubTopicChart(true);
-          setShowSubTopicColumn(true);
-        }
-        sethasTableData(true);
       }};  
 
     useEffect(() => {
@@ -261,12 +254,18 @@ const TopicsChart = (props) => {
             const counts = uniqueValues.map((value) =>
             extractedColumnData.filter((v) => v === value).length
             );
+
+            const sortedIndices = counts.map((value, index) => index)
+            .sort((a, b) => counts[a] - counts[b]);
+
+            const sortedArray_labels = sortedIndices.map((index) => uniqueValues[index]);
+            var sorted_counts = counts.sort((a,b) => a-b);
       
             setChartData({
-              labels: uniqueValues,
+              labels: sortedArray_labels,
               datasets: [
                 {
-                  data: counts,
+                  data: sorted_counts,
                   backgroundColor: function(context) {
                     
                     const colorIndex = context.dataIndex % gradientColors.length;
@@ -290,6 +289,7 @@ const TopicsChart = (props) => {
                 }
       ]
             });
+            setTotalComments(data.length);
           }
     
         }
@@ -303,7 +303,6 @@ const TopicsChart = (props) => {
           },
           legend: {
             display: false,
-    
           },
           datalabels: {
             color: '#ffffff',
@@ -318,9 +317,9 @@ const TopicsChart = (props) => {
               size: 9.5
           }
           },
+          
         },
         onClick: handleSectionClick,
-        onHover : handleTopicsOnHoverEvent,
       };  
 
     const optionsSubChart = {
@@ -347,7 +346,6 @@ const TopicsChart = (props) => {
           }
         },
         onClick: handleSubTopicSectionClick,
-        onHover : handleOnHoverEvent
       };  
 
       const sentimentOptions = {
@@ -395,7 +393,7 @@ const TopicsChart = (props) => {
     const positiveSentimentData = {
         datasets: [
           {
-            data: [positiveVal,100-positiveVal],
+            data: [sentimentsVal[0],100-sentimentsVal[0]],
             // data: [10,30],
             backgroundColor: [
               '#00FF00',
@@ -413,7 +411,7 @@ const TopicsChart = (props) => {
     const negativeSentimentData = {
         datasets: [
           {
-            data: [negativeVal,100-negativeVal],
+            data: [sentimentsVal[2],100-sentimentsVal[2]],
             // data: [10,30],
             backgroundColor: [
               '#FF4433',
@@ -431,7 +429,7 @@ const TopicsChart = (props) => {
     const neutralSentimentData = {
         datasets: [
           {
-            data: [neutralVal,100-neutralVal],
+            data: [sentimentsVal[1],100-sentimentsVal[1]],
             // data: [10,30],
             backgroundColor: [
               '#FAFA33',
@@ -528,49 +526,65 @@ const TopicsChart = (props) => {
 
   }
 
+  const addTextCenter = {
+    id:'textCenter',
+    beforeDatasetDraw(chart,args,pluginOptions) {
+      const {ctx,data} = chart;
+
+      ctx.save();
+      ctx.font = 'bolder 20px sans-serif';
+      ctx.fillStyle = 'white';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`Number of Comments: ${totalComments} `,chart.getDatasetMeta(0).data[0].x,chart.getDatasetMeta(0).data[0].y);
+    }
+  }
+
   
 
 
     return (
         <div>
-        <h2 className="text-color-topic">Topic Hierarchy</h2> 
+        {!showSubTopicChart && <h2 className="text-color-topic">Topics</h2>} 
+        {showSubTopicChart && <h2 className="text-color-topic">SubTopics</h2>} 
         <div className="topicsContainer">    
         {chartData.labels && chartData.datasets && !showSubTopicChart &&(
           <Doughnut
             data={chartData}
             options = {options}
-            // plugins = {[addTextCenter]}
+            plugins = {[addTextCenter]}
           />
         )}
 
-      {showSubTopicChart && <Doughnut data={subTopicChartData} options = {optionsSubChart} />}
+      {showSubTopicChart && <Doughnut data={subTopicChartData} options = {optionsSubChart} plugins = {[addTextCenter]}/>}
         </div>
         <div className="vertDivider"></div>
 
-        <h2 className="text-color-sentinment">Sentiments By Topic</h2>  
+        {!showSubTopicChart &&<h2 className="text-color-sentinment">Sentiments For Topic</h2>}
+        {showSubTopicChart &&<h2 className="text-color-sentinment">Sentiments For SubTopic</h2>}   
         <div className='sentimentStyle'>   
         <div className='positiveSentiment'>    
-       {showPositiveChart && <Doughnut
+        <Doughnut
        data = {positiveSentimentData}
        plugins = {[backgroundCircle,addPositiveTextCenter]}  
        options={sentimentOptions}
-       />}
+       />
        </div>  
 
        <div className='negativeSentiment'>    
-       {showNegativeChart && <Doughnut
+       <Doughnut
        data = {negativeSentimentData}
        plugins = {[backgroundCircle,addNegativeTextCenter]}  
        options={sentimentOptions}
-       />}
+       />
        </div>  
 
        <div className='neutralSentiment'>    
-       {showNeutralChart && <Doughnut
+       <Doughnut
        data = {neutralSentimentData}
        plugins = {[backgroundCircle,addNeutralTextCenter]}  
        options={sentimentOptions}
-       />}
+       />
        </div>  
 
        </div>
@@ -580,7 +594,10 @@ const TopicsChart = (props) => {
        <div>
 
        
-       <h3 className='text-color-table'>Comments By Topic</h3>
+       {!showSubTopicChart &&<h3 className='text-color-table'>Comments For Topic:</h3>}
+       {!showSubTopicChart &&<p className='style_topic_name'>{selectedTopic}</p>}       
+       {showSubTopicChart &&<h3 className='text-color-table'>Comments For SubTopic:</h3>}
+       {showSubTopicChart && <p className='style_subtopic_name'>{selectedTopic}</p>}
        {/* <h3 className='text-color-table'>Selected Topic: {selectedTopic}</h3> */}
 
 
@@ -608,7 +625,7 @@ const TopicsChart = (props) => {
         <table className="styled-table">
         <thead>
           <tr>
-            <th>Selected Topic : {selectedTopic} </th>
+            {/* <th>Selected Topic : {selectedTopic} </th> */}
           </tr>
         </thead>
         <tbody>

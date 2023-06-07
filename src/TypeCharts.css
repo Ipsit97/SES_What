@@ -43,8 +43,7 @@
   height: 600px;
   margin-left: -30px;
   margin-top: -800px;
-  border-radius: 20px;
-  border: 2px solid rgb(255, 255, 255);
+  border: 1px solid rgb(92, 89, 89);
 }
 
 .styled-type-table th,
@@ -52,7 +51,7 @@
     padding: 12px 15px;
     color: white;
     font-size: 0.9em;
-    border: 1px solid rgb(255, 255, 255);
+    border: 1px solid grey;
 }
 
 .styled-type-table thead tr {
@@ -84,3 +83,11 @@
   border-radius: 8px;
 }
 
+.style_topic_type
+{
+  color: white;
+  font-size: 20px;
+  position: absolute;
+  margin-left: 1052px;
+  margin-top: -902px;
+}

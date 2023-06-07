@@ -32,11 +32,12 @@ const GlobalSentiment = (props) => {
             else
               neu++;    
           }
-    
-          sentiments.push(((p/(p+n+neu))*100).toFixed(2));
-          sentiments.push(((neu/(p+n+neu))*100).toFixed(2));
-          sentiments.push(((n/(p+n+neu))*100).toFixed(2));
-
+          var positive = ((p/(p+n+neu))*100).toFixed(0);
+          var neutral = ((neu/(p+n+neu))*100).toFixed(0);
+          var negative = 100-(parseInt(positive)+parseInt(neutral));
+          sentiments.push(positive);
+          sentiments.push(neutral);
+          sentiments.push(negative);
       }
       setBarData(sentiments);
 }
@@ -51,7 +52,7 @@ const GlobalSentiment = (props) => {
       tooltip:
       {
         enabled:false,
-      }
+      },
     },
     scales:{
       x:{
@@ -82,7 +83,7 @@ const GlobalSentiment = (props) => {
           color:'white',
         }
       },
-    }
+    },
   };
 
   const labels = ['Positve','Neutral','Negative'];
@@ -104,7 +105,11 @@ const data1 = {
         align:'top',
         formatter: function(value){
           return value + '%';
-      }
+      },
+      font: {
+        weight: 'bold',
+        size: 15,
+    }
     }
   }
   ],

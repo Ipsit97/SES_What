@@ -11,7 +11,24 @@
     position: absolute;
     margin-left: 40px;
     margin-top: -170px;
-  }
+}
+
+.style_topic_name
+{
+    color: white;
+    font-size: 19px;
+    position: absolute;
+    margin-left: 1070px;
+    margin-top: -58px;
+}
+
+.style_subtopic_name{
+    color: white;
+    font-size: 19px;
+    position: absolute;
+    margin-left: 1100px;
+    margin-top: -58px;
+}
 
 .text-color-sentinment
 {
@@ -54,10 +71,9 @@
 
 .text-color-table {
     color: white;
-    font-size: 20px;
-    text-align: center;
+    font-size: 15px;
     margin-top: 30px;
-    margin-left: 440px;
+    margin-left: 450px;
     font-size: 30px;
 }
 
