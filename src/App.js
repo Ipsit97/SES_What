@@ -7,118 +7,75 @@ import ChartDataLabels from "chartjs-plugin-datalabels";
 import GlobalSentiment from './GlobalSentiment.js';
 import ComparisonGraphs from './ComparisonGraphs';
 import TypeCharts from './TypeCharts.js';
-import Navbar from './NavBar.js';
+import './NavBar.css';
 
 import './App.css';
 import TopicsChart from './TopicsChart';
 
 
-const InputOption = ({
-  getStyles,
-  Icon,
-  isDisabled,
-  isFocused,
-  isSelected,
-  children,
-  innerProps,
-  ...rest
-}) => {
-  const [isActive, setIsActive] = useState(false);
-  const onMouseDown = () => setIsActive(true);
-  const onMouseUp = () => setIsActive(false);
-  const onMouseLeave = () => setIsActive(false);
-  
-
-  // styles
-  let bg = "transparent";
-  if (isFocused) bg = "#eee";
-  if (isActive) bg = "#B2D4FF";
-
-  const style = {
-    backgroundColor: bg,
-    color: "inherit",
-
-  };
-
-  // prop assignment
-  const props = {
-    ...innerProps,
-    onMouseDown,
-    onMouseUp,
-    onMouseLeave,
-    style
-  };
-
-  return (
-    <components.Option
-      {...rest}
-      isDisabled={isDisabled}
-      isFocused={isFocused}
-      isSelected={isSelected}
-      getStyles={getStyles}
-      innerProps={props}
-    >
-      <input type="checkbox" checked={isSelected} />
-      {children}
-    </components.Option>
-  );
-};
-
-const allOptions = [
-  { value: "Year", label: "Year" },
-  { value: "Course", label: "Course" },
-  { value: "Category", label: "Category" },
-  { value: "Gender", label: "Gender" }
-];
-
-
-
 function App() {
 
   const [data, setData] = useState([]);
-  // const [showMenu1,setShowMenu1] = useState(false);
-  // const [selectedValue1,setSelectedValue1] = useState(null);
-  const [selectedOptions, setSelectedOptions] = useState([]);
-  const [isOpen, setIsOpen] = useState(false);
+  const [originalData, setOriginalData] = useState([]);
 
   //additon
   const [burger_class, setBurgerClass] = useState("burger-bar unclicked")
-    const [menu_class, setMenuClass] = useState("menu hidden")
-    const [isMenuClicked, setIsMenuClicked] = useState(false)
-
-    const [showYearList, setShowYearList] = useState(false);
-    const [showCategoryList, setShowCategoryList] = useState(false);
-    const [checkedItems, setCheckedItems] = useState({});
+  const [menu_class, setMenuClass] = useState("menu hidden")
+  const [isMenuClicked, setIsMenuClicked] = useState(false)
+  const [filterData, setFilterData] = useState({})
+  const [selectedDictionary, setSelectedDictionary] = useState({});
+  const [expandedKey, setExpandedKey] = useState(null);
+  const [selectedValues, setSelectedValues] = useState([]);
 
     // toggle burger menu change
     const updateMenu = () => {
-      if(!isMenuClicked) {
+      if(!isMenuClicked) 
+      {
           setBurgerClass("burger-bar clicked")
           setMenuClass("menu visible")
+
+          // Add items to the list
+          const extractedData = [];
+          const columnsToExclude = ["Comments","OriginalC","Topics","SubTopics","Sentiment"];
+
+          data.forEach((row) => {
+            const extractedRow = {};
+            Object.keys(row).forEach((key) => {
+              if (!columnsToExclude.includes(key)) {
+                extractedRow[key] = row[key];
+              }
+            });
+
+            extractedData.push(extractedRow);
+          });
+          const columns = Object.keys(extractedData[0]);
+          console.log(columns);
+          
+          var dictForFilter = {};
+
+          for(var i =0;i<columns.length;i++)
+          {
+            const extractedColumnData = data.map((row) => row[columns[i]]);
+
+            if (extractedColumnData.length > 0) {
+              const uniqueValues = [...new Set(extractedColumnData)];
+              if(uniqueValues.length < 10)
+              {
+                dictForFilter[columns[i]] = uniqueValues;
+              }
+          }
+        }
+
+        setFilterData(dictForFilter);
       }
-      else {
+      else 
+      {
           setBurgerClass("burger-bar unclicked")
           setMenuClass("menu hidden")
       }
       setIsMenuClicked(!isMenuClicked)
   }
 
-const handleYearButtonClick = () => {
-  setShowYearList(!showYearList);
-};
-
-const handleCategoryButtonClick = () => {
-  setShowCategoryList(!showCategoryList);
-};
-
-const handleCheckboxChange = (event, itemId) => {
-  setCheckedItems((prevCheckedItems) => ({
-    ...prevCheckedItems,
-    [itemId]: event.target.checked,
-  }));
-};
-
-//done
 
 
   // parse CSV data & store it in the component state
@@ -129,6 +86,7 @@ const handleCheckboxChange = (event, itemId) => {
       header: true,
       complete: function (results) {
         setData(results.data);
+        setOriginalData(results.data);
       }
     });
   };
@@ -141,46 +99,59 @@ const handleCheckboxChange = (event, itemId) => {
     );
   };
 
-  // useEffect(() => {
-  //   const handler = () => setShowMenu1(false);
+  // const handleButtonClick = () => {
 
-  //   window.addEventListener("click", handler);
-  //   return () => {
-  //     window.removeEventListener("click",handler);
-  //   }
-  // });
+  //     const filteredResults = data.filter((row) => row['Year'] === '2019').filter((row) => row['Type'] === 'Strength');
+  //     setData(filteredResults);
+  //   };
 
-  // const handleInputClick1 = (e) => {
-  //   e.stopPropagation();
-  //   setShowMenu1(!showMenu1);
-  // };
+  const handleButtonClick =() => {
 
-  // const getDisplay_dropdown1 = () => {
-  //   if(selectedValue1)
-  //     return selectedValue1.label;
-  //   return "Sentiments";  
-  // };
+    var extractedColumnData = data;
 
-  // const onItemClick1 = (option) => {
-  //   setSelectedValue1(option);
-  // }
+    if(Object.keys(selectedDictionary).length === 0)
+    {
+      setData(originalData);
+    }
+    else
+    {
+      Object.entries(selectedDictionary).map(([key, values]) => 
+      (
+        extractedColumnData = extractedColumnData.filter((row) => row[key] === values)
+      ))
+     setData(extractedColumnData);
+    }
+  }; 
 
-  // const isSelected1 = (option) => {
-  //   if(!selectedValue1)
-  //     return false;
-  //   return selectedValue1.value === option.value;  
-  // }
+  const handleKeyClick = (key) => {
+    if (key === expandedKey) {
+      setExpandedKey(null);
+    } else {
+      setExpandedKey(key);
+    }
+  };
 
-  // const options_menu1 = [
-  //   {value:"# of Comments", label:"# of Comments"},
-  //   {value:"Sentiments", label:"Sentiments"},
-  // ];
-
-  const handleButtonClick = () => {
-
-      const filteredResults = data.filter((row) => row['Year'] === '2019').filter((row) => row['Type'] === 'Strength');
-      setData(filteredResults);
-    };
+const handleCheckboxChange = (value) => {
+  const updatedSelectedValues = [...selectedValues];
+  const keyWithValue = Object.entries(filterData).findIndex(([key, values]) => values.includes(value));
+  if (keyWithValue !== -1) {
+    const key = Object.keys(filterData)[keyWithValue];
+    if (updatedSelectedValues.includes(value)) {
+      updatedSelectedValues.splice(updatedSelectedValues.indexOf(value), 1);
+      setSelectedValues(updatedSelectedValues);
+      delete selectedDictionary[key];
+      console.log(`Checkbox with value '${value}' from key '${key}' is unchecked.`);
+    } else {
+      updatedSelectedValues.push(value);
+      setSelectedValues(updatedSelectedValues);
+      setSelectedDictionary((prevState) => ({
+        ...prevState,
+        [key]: value
+      }));
+      console.log(`Checkbox with value '${value}' from key '${key}' is checked.`);
+    }
+  }
+};
 
 
   return (
@@ -198,9 +169,57 @@ const handleCheckboxChange = (event, itemId) => {
     </div>
 
     <div className='border-style'>
-    <Navbar />
+
+    {/* Adding Hamburger   */}
+    <div style={{width: '100%', height: '100vh'}}>
+            <nav>
+                <div className="burger-menu" onClick={updateMenu}>
+                    <div className={burger_class} ></div>
+                    <div className={burger_class} ></div>
+                    <div className={burger_class} ></div>
+                </div>
+            </nav>
+
+            <div className={menu_class}>
+
+      <h2 className="filters-style">Select filters:</h2>
+      <div className="dictionary-container">
+      {Object.entries(filterData).map(([key, values]) => (
+        <div key={key}>
+          <h3 onClick={() => handleKeyClick(key)} className="value-heading">{key}</h3>
+          {expandedKey === key && (
+            <ul className="value-list">
+              {values.map((value, index) => (
+                <li key={index} className="value-item">
+                    <label>
+
+                    <input
+                      type="checkbox"
+                      checked={selectedValues.includes(value)}
+                      onChange={() => handleCheckboxChange(value)}
+                    />
+                    <span className="value-subitem">{value}</span>
+                  </label>
+                </li>
+              ))}
+            </ul>
+          )}
+          <hr className="value-group-divider" />
+        </div>
+      ))}
     </div>
-    <p className='style-text_heading'>WELCOME TO SES_WHAT?</p>
+
+
+    <button onClick={handleButtonClick} className="style-button-apply">Apply</button>
+
+
+            </div>
+        </div>
+
+    {/* <!------> */}
+
+    <p className='style-text_heading'>MINING STUDENT EVALUATIONS</p>
+    </div>
 
     <input type="file" accept=".csv" onChange={handleFileUpload} />
 
