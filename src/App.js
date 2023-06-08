@@ -1,9 +1,7 @@
 import { useState, useEffect, useRef} from 'react';
 import Papa from 'papaparse';
-import Select, { components } from "react-select";
 import logo from './Logo_UCI.png';
 import anteater_logo from './anteater.png';
-import ChartDataLabels from "chartjs-plugin-datalabels";
 import GlobalSentiment from './GlobalSentiment.js';
 import ComparisonGraphs from './ComparisonGraphs';
 import TypeCharts from './TypeCharts.js';
@@ -38,7 +36,7 @@ function App() {
           const extractedData = [];
           const columnsToExclude = ["Comments","OriginalC","Topics","SubTopics","Sentiment"];
 
-          data.forEach((row) => {
+          originalData.forEach((row) => {
             const extractedRow = {};
             Object.keys(row).forEach((key) => {
               if (!columnsToExclude.includes(key)) {
@@ -99,15 +97,9 @@ function App() {
     );
   };
 
-  // const handleButtonClick = () => {
-
-  //     const filteredResults = data.filter((row) => row['Year'] === '2019').filter((row) => row['Type'] === 'Strength');
-  //     setData(filteredResults);
-  //   };
-
   const handleButtonClick =() => {
 
-    var extractedColumnData = data;
+    var extractedColumnData = originalData;
 
     if(Object.keys(selectedDictionary).length === 0)
     {
@@ -182,7 +174,8 @@ const handleCheckboxChange = (value) => {
 
             <div className={menu_class}>
 
-      <h2 className="filters-style">Select filters:</h2>
+     <h2 className="filters-style">Select filters:</h2>
+      <button onClick={handleButtonClick} className="style-button-apply">Apply</button>
       <div className="dictionary-container">
       {Object.entries(filterData).map(([key, values]) => (
         <div key={key}>
@@ -208,10 +201,6 @@ const handleCheckboxChange = (value) => {
         </div>
       ))}
     </div>
-
-
-    <button onClick={handleButtonClick} className="style-button-apply">Apply</button>
-
 
             </div>
         </div>

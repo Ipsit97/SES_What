@@ -248,6 +248,47 @@ const TypeCharts = (props) => {
         setCurrentPage(page);
       };
 
+      const handlePrevPage = () => {
+        if (currentPage > 1) {
+          setCurrentPage(currentPage - 1);
+        }
+      };
+    
+      const handleNextPage = () => {
+        if (currentPage < totalPages) {
+          setCurrentPage(currentPage + 1);
+        }
+      };
+    
+      const getPageNumbersToShow = () => {
+        const maxPageButtons = 3; // Number of page buttons to display at a time
+        const pageNumbers = [];
+    
+        if (totalPages <= maxPageButtons) {
+          // Display all page buttons if the total number of pages is less than or equal to the maxPageButtons
+          for (let page = 1; page <= totalPages; page++) {
+            pageNumbers.push(page);
+          }
+        } else {
+          // Calculate the starting and ending page numbers to display
+          let startPage = Math.max(currentPage - Math.floor(maxPageButtons / 2), 1);
+          let endPage = startPage + maxPageButtons - 1;
+    
+          if (endPage > totalPages) {
+            // Adjust the starting and ending page numbers if the calculated range exceeds the total number of pages
+            startPage = totalPages - maxPageButtons + 1;
+            endPage = totalPages;
+          }
+    
+          // Add the page numbers to the array
+          for (let page = startPage; page <= endPage; page++) {
+            pageNumbers.push(page);
+          }
+        }
+    
+        return pageNumbers;
+      };
+
       
       
 
@@ -283,15 +324,22 @@ const TypeCharts = (props) => {
         </tbody>
       </table>
       <div className="paginationStyle">
-        {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
+        <button onClick={handlePrevPage} disabled={currentPage === 1} className="arrow-button">
+        <span className="arrow">&lt;</span> {/* Left arrow */}
+        </button>
+        {getPageNumbersToShow().map((page) => (
           <button
             key={page}
-            className = "active" onClick={() => handlePageChange(page)}
+            className={page === currentPage ? 'active' : ''}
+            onClick={() => handlePageChange(page)}
             disabled={page === currentPage}
           >
             {page}
           </button>
         ))}
+        <button onClick={handleNextPage} disabled={currentPage === totalPages} className="arrow-button">
+        <span className="arrow"> &gt;</span>  {/* Right arrow */}
+        </button>
       </div>
       </div>
       </div>

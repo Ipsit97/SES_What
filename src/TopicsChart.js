@@ -25,6 +25,23 @@ const gradientColors = [
     "rgba(233, 117, 11, 0.8)",
   ];
 
+  function createGradientColors(count, startR, startG, startB) {
+    const gradientColors = [];
+  
+    for (let i = 0; i < count; i++) {
+      const factor = i / (count - 1);
+      const r = Math.round(startR * (1 - factor));
+      const g = Math.round(startG * (1 - factor));
+      const b = Math.round(startB * (1 - factor));
+      const color = `rgb(${r}, ${g}, ${b})`;
+      gradientColors.push(color);
+    }
+  
+    return gradientColors;
+  } 
+
+  
+
 const TopicsChart = (props) => {
 
     var data = props.message;
@@ -162,17 +179,8 @@ const TopicsChart = (props) => {
               labels: sortedArray_labels,
               datasets: [
                 {
-                  data: sorted_counts,
-                  backgroundColor: function(context) {
-                    
-                    const colorIndex = context.dataIndex % subTopicGradientColors.length;
-                    let c = subTopicGradientColors[colorIndex];
-                
-                      const mid = color(c).desaturate(0.4).darken(0.3).rgbString();
-                      const start = color(c).lighten(0.5).rotate(270).rgbString();
-                      const end = color(c).lighten(0.1).rgbString();
-                      return getGradient(context, start, mid, end);
-                  }, 
+                  data: sorted_counts, 
+                  backgroundColor:createGradientColors(sortedArray_labels.length,247,235,95),
                   datalabels:
                   {
                     rotation : function(ctx) {
@@ -206,9 +214,11 @@ const TopicsChart = (props) => {
             setSelectedSubTopics(selectedTopicSubs);
           }
 
-          if (filteredResults.join(',') !== filteredResultsForTable.join(',')) {
-            setFilteredResultsForTable(filteredResults);
-          }
+          setFilteredResultsForTable('');
+          setFilteredResultsForTable(filteredResults);
+          // if (filteredResults.join(',') !== filteredResultsForTable.join(',')) {
+          //   setFilteredResultsForTable(filteredResults);
+          // }
           setCurrentPage(1);
           setSelectedTopic(topic);
           setSelectedComments(storeTableData);
@@ -266,16 +276,17 @@ const TopicsChart = (props) => {
               datasets: [
                 {
                   data: sorted_counts,
-                  backgroundColor: function(context) {
+                  // backgroundColor: function(context) {
                     
-                    const colorIndex = context.dataIndex % gradientColors.length;
-                    let c = gradientColors[colorIndex];
+                  //   const colorIndex = context.dataIndex % gradientColors.length;
+                  //   let c = gradientColors[colorIndex];
                 
-                      const mid = color(c).desaturate(0.4).darken(0.3).rgbString();
-                      const start = color(c).lighten(0.5).rotate(270).rgbString();
-                      const end = color(c).lighten(0.1).rgbString();
-                      return getGradient(context, start, mid, end);
-                  },
+                  //     const mid = color(c).desaturate(0.4).darken(0.3).rgbString();
+                  //     const start = color(c).lighten(0.5).rotate(270).rgbString();
+                  //     const end = color(c).lighten(0.1).rgbString();
+                  //     return getGradient(context, start, mid, end);
+                  // },
+                  backgroundColor:createGradientColors(sortedArray_labels.length,247,235,95),
                   datalabels:
                   {
                     rotation: function(ctx) {
@@ -506,6 +517,47 @@ const TopicsChart = (props) => {
     setCurrentPage(page);
   };
 
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const getPageNumbersToShow = () => {
+    const maxPageButtons = 3; // Number of page buttons to display at a time
+    const pageNumbers = [];
+
+    if (totalPages <= maxPageButtons) {
+      // Display all page buttons if the total number of pages is less than or equal to the maxPageButtons
+      for (let page = 1; page <= totalPages; page++) {
+        pageNumbers.push(page);
+      }
+    } else {
+      // Calculate the starting and ending page numbers to display
+      let startPage = Math.max(currentPage - Math.floor(maxPageButtons / 2), 1);
+      let endPage = startPage + maxPageButtons - 1;
+
+      if (endPage > totalPages) {
+        // Adjust the starting and ending page numbers if the calculated range exceeds the total number of pages
+        startPage = totalPages - maxPageButtons + 1;
+        endPage = totalPages;
+      }
+
+      // Add the page numbers to the array
+      for (let page = startPage; page <= endPage; page++) {
+        pageNumbers.push(page);
+      }
+    }
+
+    return pageNumbers;
+  };
+
   const getRowColor = (value) => {
     if (value === 'positive') {
       return '#0BDA51';
@@ -637,16 +689,23 @@ const TopicsChart = (props) => {
           ))}
         </tbody>
       </table>
-      <div className="paginationStyle">
-        {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
+       <div className="paginationStyle">
+        <button onClick={handlePrevPage} disabled={currentPage === 1} className="arrow-button">
+        <span className="arrow">&lt;</span> {/* Left arrow */}
+        </button>
+        {getPageNumbersToShow().map((page) => (
           <button
             key={page}
-            className = "active" onClick={() => handlePageChange(page)}
+            className={page === currentPage ? 'active' : ''}
+            onClick={() => handlePageChange(page)}
             disabled={page === currentPage}
           >
             {page}
           </button>
         ))}
+        <button onClick={handleNextPage} disabled={currentPage === totalPages} className="arrow-button">
+        <span className="arrow"> &gt;</span>  {/* Right arrow */}
+        </button>
       </div>
       </div>
 

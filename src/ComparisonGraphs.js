@@ -19,6 +19,9 @@ const ComparisonGraphs = (props) => {
   const [ChartLabelData,setChartLabelData] = useState(null);
   const [ChartData,setChartData] = useState(null);
   const [typeChart,setTypeChart] = useState("");
+  const [dataAvailable,setDataAvailable] = useState(false);
+  const [valueofdata,setValueOfData] = useState('');
+
   
 
 
@@ -112,24 +115,28 @@ const ComparisonGraphs = (props) => {
         if (data.length > 0) {
           var val="";
 
+          if(selectedValue1.value === "# of Comments")
+          {
+            setTypeChart("Line");
+          }
+
           if(selectedValue2.value === "Category")
           {
             val = "Type";
-            setTypeChart("Polar");
           }
           else if(selectedValue2.value === "Year")
           {
             val = "Year";
-            setTypeChart("Line");
           }  
           else if(selectedValue2.value === "Type_Class")  
             val = "Grad vs Under_Grad";
           else
             val = "Course";   
 
-          const extractedColumnData = data.map((row) => row[val]);
+          var extractedColumnData = data.filter((row) => row[val]);
 
           if (extractedColumnData.length > 0) {
+            extractedColumnData = data.map((row) => row[val]);
             const uniqueValues = [...new Set(extractedColumnData)];
             const counts = uniqueValues.map((value) =>
             extractedColumnData.filter((v) => v === value).length
@@ -137,10 +144,12 @@ const ComparisonGraphs = (props) => {
             
               setChartLabelData(getDataWithEmptyPoint(uniqueValues));
               setChartData(getDataWithEmptyPoint(counts));
+              setDataAvailable(true);
           }
           else
           {
-
+            setDataAvailable(false);
+            setValueOfData(val);
           }
 
       }
@@ -337,8 +346,9 @@ const ComparisonGraphs = (props) => {
       <button onClick={handleButtonClick} className="styleButton_apply">Apply</button>
 
       <div className="lineChartStyle">
-        {typeChart === "Line" && <Line data={data_lineChart} options={options} />}
+        {typeChart === "Line" && dataAvailable &&<Line data={data_lineChart} options={options} />}
       </div>
+      {!dataAvailable && !(valueofdata.length === 0) &&<h2 className="data-notavailable-style">Please enter a column with name: {valueofdata}</h2>}
       <div className="polarChartStyle">  
         {typeChart === "Polar" && <PolarArea data={data_polarChart}  />}
       </div>

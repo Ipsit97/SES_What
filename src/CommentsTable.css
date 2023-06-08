@@ -32,7 +32,7 @@
   background-color: rgb(16, 99, 151);
 }
 
-.paginationStyle
+/* .paginationStyle
 {
   display: inline-block;
 }
@@ -48,4 +48,37 @@
   background-color: #1f1d1d;
   color: white;
   border-radius: 8px;
+} */
+.paginationStyle {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.paginationStyle button {
+  background-color: #ffffff;
+  border: 1px solid #dddddd;
+  color: black;
+  padding: 0.5rem 1rem;
+  margin: 0 0.2rem;
+  cursor: pointer;
+  border-radius: 7px;
+}
+
+.paginationStyle button.active {
+  background-color: #007bff;
+  color: #ffffff;
+}
+
+.paginationStyle button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.paginationStyle .arrow-button {
+  background-color: transparent;
+  border: none;
+}
+
+.paginationStyle .arrow-button .arrow {
+  font-size: 1.2rem;
 }
